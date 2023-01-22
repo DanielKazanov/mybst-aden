@@ -24,7 +24,7 @@ public class MyBST<E extends Comparable<E>> {
 	 * Instantiates a new MyBST .
 	 */
 	public MyBST() {
-		// TODO: Complete this constructor
+		this.root = null;
 	}
 	
 	// Part 1 - code and validate the insert and search methods
@@ -35,8 +35,7 @@ public class MyBST<E extends Comparable<E>> {
 	 * @return the root node of the Binary Search Tree
 	 */
 	public BSTNode<E> getRoot() {
-		// TODO: Write this method
-		return null;
+		return root;
 	}
 
 	
@@ -46,8 +45,7 @@ public class MyBST<E extends Comparable<E>> {
 	 * @return the size of the Binary Search Tree
 	 */
 	public int getSize() {
-		// TODO: Write this method
-		return -1;
+		return size;
 	}
 	/**
 	 * Insert.
@@ -56,9 +54,34 @@ public class MyBST<E extends Comparable<E>> {
 	 * @return true, if successful; false if e already exists in the BST
 	 */
 	public boolean insert(E e) {
-		// TODO: Write the insert method. Refer to the pseudocode in the 
-		//       slides to help you if needed.
-		return false;
+		if (root == null) { // BST is empty, no root exists --> create new node
+			root = new BSTNode<E>(e, null);
+			size++;
+			return true;
+		}
+		
+		BSTNode<E> counterNode = root;
+		int counter = e.compareTo(counterNode.getData());
+				
+		while ((counter < 0 && counterNode.hasLeft()) || (counter > 0 && counterNode.hasRight())) { // Iterating to correct e location in BST
+			if (counter < 0) {
+				counterNode = counterNode.getLeftChild();
+			} else {
+				counterNode = counterNode.getRightChild();
+			}
+			counter = e.compareTo(counterNode.getData());
+		}
+		
+		if (counter < 0) {
+			counterNode.setLeftChild(new BSTNode<E>(e, counterNode));
+		} else if (counter > 0) {
+			counterNode.setRightChild(new BSTNode<E>(e, counterNode));
+		} else {
+			return false; // e already exists in the BST
+		}
+		
+		size++;
+		return true;
 	}
 	
 	/**
@@ -68,9 +91,24 @@ public class MyBST<E extends Comparable<E>> {
 	 * @return true, if the element was found in the list...
 	 */
 	public boolean search(E e) {
-		// TODO: Write the search method. Refer to the pseudocode in the 
-		//       slides to help you if needed.
-		return false; 
+		BSTNode<E> counterNode = root;
+		int counter = e.compareTo(counterNode.getData());
+		
+		while ((counter < 0 && counterNode.hasLeft()) || (counter > 0 && counterNode.hasRight())) {
+			if (counter < 0) {
+				counterNode = counterNode.getLeftChild();
+			} else {
+				counterNode = counterNode.getRightChild();
+			}
+			counter = e.compareTo(counterNode.getData());
+		}
+		
+		if (counter == 0) {
+			return true;
+		} else {
+			return false;
+		}
+		
 	}
 	
 
@@ -102,7 +140,13 @@ public class MyBST<E extends Comparable<E>> {
 	 * @param node the node
 	 */
 	private void preorder(BSTNode<E> node) {
-		// TODO: write the private preorder recursive method
+		if (node == null) { // end of tree branch
+			return;
+		}
+		
+		strOrder += node.getData() + ",";
+		preorder(node.getLeftChild());
+		preorder(node.getRightChild());
 	}
 
 	/**
@@ -122,7 +166,13 @@ public class MyBST<E extends Comparable<E>> {
 	 * @param node the node being traversed
 	 */
 	private void inorder(BSTNode<E> node) {
-		// TODO: write the private inorder recursive method
+		if (node == null) { // end of tree branch
+			return;
+		}
+		
+		inorder(node.getLeftChild());
+		strOrder += node.getData() + ",";
+		inorder(node.getRightChild());
 	}
 	
 	/**
@@ -142,7 +192,13 @@ public class MyBST<E extends Comparable<E>> {
 	 * @param node the node being traversed
 	 */
 	private void postorder(BSTNode<E> node) {
-		// TODO: write the private postorder recursive method
+		if (node == null) { // end of tree branch
+			return;
+		}
+		
+		postorder(node.getLeftChild());
+		postorder(node.getRightChild());
+		strOrder += node.getData() + ",";
 	}
 	
 	// Part 3: Level order Traversal and node removal
