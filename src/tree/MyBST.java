@@ -210,7 +210,23 @@ public class MyBST<E extends Comparable<E>> {
 	 */
 	public void levelorder() {
 		strOrder = "";
-		// TODO: write the levelorder method
+		Queue<BSTNode<E>> levelQ = new LinkedList<BSTNode<E>>();
+		levelQ.add(root);
+		
+		while (!levelQ.isEmpty()) {
+			BSTNode<E> counterNode = levelQ.remove();
+			
+			if (counterNode != null) {
+				strOrder += counterNode.getData() + ",";
+				
+				if (counterNode.hasLeft()) {
+					levelQ.add(counterNode.getLeftChild());
+				}
+				if (counterNode.hasRight()) {
+					levelQ.add(counterNode.getRightChild());
+				}
+			}
+		}
 	}
 	
 	/**
@@ -220,9 +236,23 @@ public class MyBST<E extends Comparable<E>> {
 	 * @return the matching BSTNode if element was found; null otherwise.
 	 */
 	private BSTNode<E> getMatchingNode(E e) {
-		// TODO: write this method - should be similar to search except that it
-		//       returns a BSTNode
-		return null;
+		BSTNode<E> counterNode = root;
+		int counter = e.compareTo(counterNode.getData());
+		
+		while ((counter < 0 && counterNode.hasLeft()) || (counter > 0 && counterNode.hasRight())) { // Iterating to correct e location in BST
+			if (counter < 0) {
+				counterNode = counterNode.getLeftChild();
+			} else {
+				counterNode = counterNode.getRightChild();
+			}
+			counter = e.compareTo(counterNode.getData());
+		}
+		
+		if (counter == 0) {
+			return counterNode;
+		} else {
+			return null; // No matching node found
+		}
 	}
 
 	/**
@@ -236,8 +266,27 @@ public class MyBST<E extends Comparable<E>> {
 	 * @param parent the parent
 	 * @param child the child
 	 */
-	private void connectToParent(E e, BSTNode<E> parent, BSTNode<E> child) {
-		// TODO: write this method
+	private void connectToParent(boolean left, BSTNode<E> parent, BSTNode<E> child) {
+		if (parent == null) {
+			root = child;
+			
+			if (child != null) {
+				child.setParent(null);
+			}
+			return;
+		}
+
+		if (left) {
+			parent.setLeftChild(child);
+		} else {
+			parent.setRightChild(child);
+		}
+		
+		if (child == null) {
+			return;
+		}
+		
+		child.setParent(parent);
 	}
 	
 	/**
@@ -247,8 +296,10 @@ public class MyBST<E extends Comparable<E>> {
 	 * @return the BST node
 	 */
 	private BSTNode<E> findLeftMostNode(BSTNode<E> node) {
-		// TODO: write this method
-		return null;
+		while (node.hasLeft()) {
+			node = node.getLeftChild();
+		}
+		return node;
 	}
 
 	/**
@@ -258,12 +309,60 @@ public class MyBST<E extends Comparable<E>> {
 	 * @return true if the element was found and deleted; false otherwise
 	 */
 	public boolean remove(E e) {
-		// TODO: write this method. Refer to the slides to review all cases
-		//       that must be handled. Use the helper methods above to simplify
-		//       your code.
-		return false;
+		BSTNode<E> nodeToRemove = getMatchingNode(e);
+		boolean hasLeft = false;
+		
+		if (nodeToRemove == null) {
+			return false;
+		}
+		
+		if (nodeToRemove.getParent() != null) {
+			hasLeft = checkLeftNode(nodeToRemove);
+		}
+		
+		if (!nodeToRemove.hasLeft() && !nodeToRemove.hasRight()) {
+			connectToParent(hasLeft, nodeToRemove.getParent(), null);
+		} else {
+			if (nodeToRemove.hasLeft() && !nodeToRemove.hasRight()) {
+				connectToParent(hasLeft, nodeToRemove.getParent(), nodeToRemove.getLeftChild());
+			} else if (!nodeToRemove.hasLeft() && nodeToRemove.hasRight()) {
+				connectToParent(hasLeft, nodeToRemove.getParent(), nodeToRemove.getRightChild());
+			} else if (nodeToRemove.hasLeft() && nodeToRemove.hasRight()) {
+				BSTNode<E> leftMostNode = findLeftMostNode(nodeToRemove.getRightChild());
+				removeHasLeftAndRightNode(nodeToRemove, leftMostNode, hasLeft);
+			}
+		}
+		
+		size--;
+		return true;
+	}
+	
+	/**
+	 * Check whether the node to remove has a left node in the BST
+	 * 
+	 * @param nodeToRemove the node to remove from the BST
+	 * @return true if has a left node; false otherwise
+	 */
+	private boolean checkLeftNode(BSTNode<E> nodeToRemove) {
+		return (nodeToRemove.getParent().getData().compareTo(nodeToRemove.getData()) > 0);
+	}
+	
+	/**
+	 * Cases for when the nodeToRemove has both left and right nodes in the BST branch
+	 * 
+	 * @param nodeToRemove the node to remove from the BST
+	 * @param leftMostNode the left most node in the BST branch
+	 * @param hasLeft the boolean whether or not nodeToRemove has a left node in the BST
+	 */
+	private void removeHasLeftAndRightNode(BSTNode<E> nodeToRemove, BSTNode<E> leftMostNode, boolean hasLeft) {
+		if (nodeToRemove == leftMostNode.getParent()) {
+			connectToParent(true, leftMostNode, nodeToRemove.getLeftChild());
+			connectToParent(hasLeft, nodeToRemove.getParent(), leftMostNode);
+		} else {
+			connectToParent(true, leftMostNode, nodeToRemove.getLeftChild());
+			connectToParent(true, leftMostNode.getParent(), leftMostNode.getRightChild());
+			connectToParent(false, leftMostNode, nodeToRemove.getRightChild());
+			connectToParent(hasLeft, nodeToRemove.getParent(), leftMostNode);
+		}
 	}
 }
-
-
-
